@@ -1,21 +1,118 @@
-name: Tournament Organizer V2 Production Deployment
+name: Tournament Organizer V2 CI/CD script
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-on:
-  push:
-    branches:
-      - main
+on: 
+  push
   pull_request:
     branches: 
       - main
-    types: [closed]
+      - dev
+    types: [review_requested]
 jobs:
-  Deploy-Production:
-    if: github.event.pull_request.merged == true
+  lint-dev:
+    if: !contains(github.ref, 'main')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - run: echo "DEVELOPMENT - LINTING ..."
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install Dependencies
+        run: npm install
+      - name: Lint Code
+        run: npm run lint
+
+  build-dev:
+    if: !contains(github.ref, 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "DEVELOPMENT - BUILDING ..."
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install Dependencies
+        run: npm install
+      - name: Build Project Artifacts
+        run: npm run build
+  
+  test-dev:
+    if: !contains(github.ref, 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "DEVELOPMENT - RUNNING UNIT TEST ..."
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install Dependencies
+        run: npm install
+      - name: Run Tests
+        run: npm run test
+
+  lint-prod:
+    if: contains(github.ref, 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "PRODUCTION - LINTING ..."
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install Dependencies
+        run: npm install
+      - name: Lint Code
+        run: npm run lint
+
+  build-prod:
+    if: contains(github.ref, 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "PRODUCTION - BUILDING ..."
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install Dependencies
+        run: npm install
+      - name: Build Project Artifacts
+        run: npm run build
+  
+  test-prod:
+    if: contains(github.ref, 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "PRODUCTION - RUNNING UNIT TEST ..."
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install Dependencies
+        run: npm install
+      - name: Run Tests
+        run: npm run test
+
+  deploy-prod:
+    if: contains(github.ref, 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "PRODUCTION - DEPLOYING ..."
+      - name: Checkout Repository
+        uses: actions/checkout@v4
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information
