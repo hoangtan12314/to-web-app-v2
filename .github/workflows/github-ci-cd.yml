@@ -3,7 +3,11 @@ env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 on: 
-  push
+  push:
+    branches: 
+      - "**"
+      - "!main"  
+      - "!dev" 
   pull_request:
     branches: 
       - main
@@ -11,7 +15,7 @@ on:
     types: [review_requested]
 jobs:
   lint-dev:
-    if: !contains(github.ref, 'main')
+    if: ${{!contains(github.ref, 'main')}}
     runs-on: ubuntu-latest
     steps:
       - run: echo "DEVELOPMENT - LINTING ..."
@@ -27,7 +31,8 @@ jobs:
         run: npm run lint
 
   build-dev:
-    if: !contains(github.ref, 'main')
+    needs: lint-dev
+    if: ${{!contains(github.ref, 'main')}}
     runs-on: ubuntu-latest
     steps:
       - run: echo "DEVELOPMENT - BUILDING ..."
@@ -43,7 +48,8 @@ jobs:
         run: npm run build
   
   test-dev:
-    if: !contains(github.ref, 'main')
+    needs: build-dev
+    if: ${{!contains(github.ref, 'main')}}
     runs-on: ubuntu-latest
     steps:
       - run: echo "DEVELOPMENT - RUNNING UNIT TEST ..."
@@ -59,7 +65,7 @@ jobs:
         run: npm run test
 
   lint-prod:
-    if: contains(github.ref, 'main')
+    if: ${{contains(github.ref, 'main')}}
     runs-on: ubuntu-latest
     steps:
       - run: echo "PRODUCTION - LINTING ..."
@@ -75,7 +81,8 @@ jobs:
         run: npm run lint
 
   build-prod:
-    if: contains(github.ref, 'main')
+    needs: lint-prod
+    if: ${{contains(github.ref, 'main')}}
     runs-on: ubuntu-latest
     steps:
       - run: echo "PRODUCTION - BUILDING ..."
@@ -91,7 +98,8 @@ jobs:
         run: npm run build
   
   test-prod:
-    if: contains(github.ref, 'main')
+    needs: build-prod
+    if: ${{contains(github.ref, 'main')}}
     runs-on: ubuntu-latest
     steps:
       - run: echo "PRODUCTION - RUNNING UNIT TEST ..."
@@ -107,7 +115,8 @@ jobs:
         run: npm run test
 
   deploy-prod:
-    if: contains(github.ref, 'main')
+    needs: test-prod
+    if: ${{contains(github.ref, 'main')}}
     runs-on: ubuntu-latest
     steps:
       - run: echo "PRODUCTION - DEPLOYING ..."
