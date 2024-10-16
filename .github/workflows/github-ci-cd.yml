@@ -3,7 +3,11 @@ env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 on: 
-  push
+  push:
+    branches: 
+      - "**"
+      - "!main"  
+      - "!dev" 
   pull_request:
     branches: 
       - main
@@ -27,6 +31,7 @@ jobs:
         run: npm run lint
 
   build-dev:
+    needs: lint-dev
     if: !contains(github.ref, 'main')
     runs-on: ubuntu-latest
     steps:
@@ -43,6 +48,7 @@ jobs:
         run: npm run build
   
   test-dev:
+    needs: build-dev
     if: !contains(github.ref, 'main')
     runs-on: ubuntu-latest
     steps:
@@ -75,6 +81,7 @@ jobs:
         run: npm run lint
 
   build-prod:
+    needs: lint-prod
     if: contains(github.ref, 'main')
     runs-on: ubuntu-latest
     steps:
@@ -91,6 +98,7 @@ jobs:
         run: npm run build
   
   test-prod:
+    needs: build-prod
     if: contains(github.ref, 'main')
     runs-on: ubuntu-latest
     steps:
@@ -107,6 +115,7 @@ jobs:
         run: npm run test
 
   deploy-prod:
+    needs: test-prod
     if: contains(github.ref, 'main')
     runs-on: ubuntu-latest
     steps:
